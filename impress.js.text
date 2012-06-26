@@ -1,0 +1,304 @@
+title: On the Effectiveness of Address Space Randomization
+author: Stefan Boesen
+
+
+%%%%%
+%% Add some inline style rules...
+
+%css
+
+@font-face {
+  font-family: 'Yanone Kaffeesatz';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Yanone Kaffeesatz Regular'), local('YanoneKaffeesatz-Regular'), url(http://themes.googleusercontent.com/static/fonts/yanonekaffeesatz/v4/YDAoLskQQ5MOAgvHUQCcLQa6gm6bS00u2Qn-iPLo1Go.woff) format('woff');
+}
+
+h1 {
+  font-family: 'Yanone Kaffeesatz';
+
+}
+#on-the-effectiveness-of-address-space-randomization {
+    color: #FF4E50;
+}
+
+#what-about-compile-time-randomization {
+  color: #029DED;
+  margin-top: 100px;
+}
+
+#solutions {
+  margin-top: 150px;
+  color: #7BA0E6;
+}
+
+#questions {
+  margin-top: 150px;
+  color: #FE1267;
+}
+
+#pax-aslr {
+  margin-top: 150px;
+  color: #0A96CE;
+}
+#mapped-memory {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: 50px;
+}
+
+#randomization-explanation-components {
+  margin-top: 0;
+}
+
+.bam > p {
+  margin-top: 190px;
+}
+
+.bam > p > b {
+    display: inline-block;
+    -webkit-transition: 0.5s;
+    -moz-transition:    0.5s;
+    -ms-transition:     0.5s;
+    -o-transition:      0.5s;
+    transition:         0.5s;
+}
+
+div.active > p > b.rotating {
+  -webkit-transform: rotate(10deg) translateY(-20px) translateX(30px) scale(1.3);
+  -moz-transform:    rotate(10deg) translateY(-20px) translateX(30px) scale(1.3);
+  -ms-transform:     rotate(10deg) translateY(-20px) translateX(30px) scale(1.3);
+  -o-transform:      rotate(10deg) translateY(-20px) translateX(30px) scale(1.3);
+  transform:         rotate(10deg) translateY(-20px) translateX(30px) scale(1.3);
+  
+  -webkit-transition-delay: 0.50s;
+  -moz-transition-delay:    0.50s;
+  -ms-transition-delay:     0.50s;
+  -o-transition-delay:      0.50s;
+  transition-delay:         0.50s;
+}
+
+
+.mapped-memory-components {
+  margin-top: 0;
+}
+
+.mapped-memory-components > li{
+  margin: 15px 0;
+}
+
+#author-list {
+  list-style-type: none;
+}
+
+#author-list > li {
+  margin: 10px;
+}
+
+ul > li {
+  font-size: 
+}
+
+ul > li > ul > li {
+  text-align: left;
+  margin-left: 50px;
+}
+
+li {
+  font-family: HelveticaNeue-UltraLight;
+  font-size: 42px;
+  text-align: left;
+  margin: 30px 0;
+}
+
+
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+body {
+  background-image: -webkit-linear-gradient(top left, #C6B299, #E6D5C1);
+  background-image:    -moz-linear-gradient(top left, silver, white);
+  background-image:     -ms-linear-gradient(top left, silver, white);
+  background-image:      -o-linear-gradient(top left, silver, white);
+  background-image:         linear-gradient(top left, black, black);
+}
+
+.step {
+  width: 700px;
+  height: 450px;
+  padding: 40px 60px;
+
+  font-size: 48px;
+  text-align: center;
+
+  opacity: 0.3;
+}
+
+.step.active {
+  opacity: 1;
+}
+
+.slide {
+  background-color: #f0f2eb;
+}
+
+.pax-slide {
+  background-color: #E1F5C4
+}
+
+.compile-time {
+  background-color: #E5D599;
+}
+
+code {
+  background-color: yellow;
+  font-size: 14px;
+}
+
+.final-info-slide {
+  padding-top: 0;
+}
+
+.final-info-slide > ul {
+  margin-top: 0;
+}
+
+.final-info-slide > ul > li {
+  font-size: 40px;
+  margin: 20px 0;
+}
+
+.final-info-slide > ul > li > ul > li{
+  font-size: 35px;
+  margin: 20px 0;
+}
+
+.questions-slide {
+  background-color: #99ADC4;
+}
+
+%end
+
+
+%%%%%%%%%%%%%%%%%%%
+%% Here we go...
+
+
+!SLIDE slide x=-1000 y=-1500
+
+On the Effectiveness of Address Space Randomization
+===================================================
+
+!SLIDE slide x=0 y=-1500
+
+<ul id="author-list">
+<li>Hovav Shacham</li>
+<li>Matthew Page</li>
+<li>Ben Pfaff</li>
+<li>Eu-Jin Goh</li>
+<li>Nagendra Modadugu</li>
+<li>Dan Boneh</li>
+</ul>
+
+!SLIDE slide pax-slide x=1000 y=-1500 rotate=90
+
+PAX ASLR
+========
+
+!SLIDE slide x=1000 y=-500 rotate=90
+
+- Linux Kernel Patch implementing ASLR
+- Randomizes three locations per ELF:
+  - Executable
+  - Stack
+  - Mapped
+
+!SLIDE slide x=400 y=-500 rotate=90
+
+- Executable: 16 bits
+- Stack: 24 bits
+- Mapped: 16 bits 
+
+- Basically adds random offset to each memory section.
+
+!SLIDE slide x=-600 y=-200 z=-800 rotate=90
+
+Mapped Memory
+=============
+
+<ul class="mapped-memory-components">
+  <li>Heap</li>
+  <li>Thread stacks</li>
+  <li>Shared memory</li>
+  <li>Dynamic libraries</li>
+    <ul class="mapped-memory-components">
+      <li>Libc</li>
+        <ul class="mapped-memory-components">
+          <li>System()</li>
+        </ul>
+    </ul>
+</ul>
+
+!SLIDE slide x=-600 y=500 rotate=90
+<ul id="randomization-explanation-components">
+  <li>Randomizes on process creation</li>
+  <li>Their example used Apache, which forks children on each request</li>
+  <ul>
+    <li>Same mapped memory</li>
+    <li>Doesn't get randomized</li>
+    <li>Probe address space linearly</li>
+  </ul>
+</ul>
+
+!SLIDE slide x=-600 y=1500 rotate=180
+
+- What if we don't fork every time?
+- Apache dies every time
+- New random offset every time
+- 2<sup>n</sup> average probes instead of 2<sup>n-1</sup>
+
+!SLIDE slide compile-time x=-1600 y=1500 rotate=180
+
+What about compile time randomization?
+======================================
+
+!SLIDE slide x=-2600 y=1500 rotate=180
+
+- Makes relative jumping useless
+- Can't be performed often
+  - Expensive
+- Doesn't make it harder to find a specific function
+
+!SLIDE slide x=-2600 y=2500 rotate=270
+
+Solutions
+=========
+
+!SLIDE slide x=-1800 y=2500 rotate=270
+
+- Canary values (StackGuard)
+- 64 bit
+- 2<sup>40</sup> - 2<sup>16</sup> (24 more bits of entropy)
+- 1099511562240 times longer (on average)
+
+!SLIDE slide bam x=-1000 y=2500 rotate=270
+
+Total time? 34.87 <b class="rotating">millennia</b>
+
+!SLIDE slide final-info-slide x=-200 y=2500 rotate=270
+
+- Watcher
+- Can't be proactive
+  - It can, but it would end up shutting the server down
+- Can't detect legitimate attacks from DOS attempts
+- Botnets
+
+!SLIDE slide questions-slide x=600 y=2500 rotate=270 z=2000
+
+Questions?
+==========
+%% The End
+%%%%%%%%%%%%%%%
